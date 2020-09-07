@@ -19,6 +19,7 @@ import java.io.UnsupportedEncodingException;
 import java.net.URLEncoder;
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ExecutionException;
@@ -53,31 +54,43 @@ public class internApp extends DialogflowApp {
 		return responseBuilder.build();
 	}
 
-	@ForIntent("next")
-	public ActionResponse nextIntent(ActionRequest request) throws ExecutionException, InterruptedException {
-		ResponseBuilder rb = getResponseBuilder(request);
-		Map<String, Object> data = rb.getConversationData();
+	@ForIntent("LibrarySelection")
+	public ActionResponse librarySelection(ActionRequest request) throws ExecutionException, InterruptedException {
+		ResponseBuilder responseBuilder = getResponseBuilder(request);
+		Map<String, Object> data = responseBuilder.getConversationData();
 
 		data.clear();
 
 		List<String> suggestions = new ArrayList<String>();
 		SimpleResponse simpleResponse = new SimpleResponse();
 		BasicCard basicCard = new BasicCard();
+		String library = CommonUtil.makeSafeString(request.getParameter("library"));
+		String text = "주소랑 전화번호"; //DB에서 해당 도서관 주소 및 전화번호 가져오기
+		String homepage = null; //DB에서 해당 도서관 홈페이지주소 가져오기
 
-		simpleResponse.setTextToSpeech("다음입니다. 넥스트.")
-				.setDisplayText("다음으로 진행됩니다.")
+		simpleResponse.setTextToSpeech(library + "에서 책을 검색할게요. 책 제목, 작가 이름, 출판사명 중" +
+				" 어떤 것으로 검색할까요?")
+//				.setDisplayText("다음으로 진행됩니다.")
 		;
 		basicCard
-				.setTitle("다음 인텐트")
-				.setFormattedText("인텐트 테스트용")
-				.setImage(new Image().setUrl("https://actions.o2o.kr/devsvr4/templates/image/library_welcome.jfif")
-						.setAccessibilityText("home"));
+				.setTitle(library)
+				.setSubtitle("도서관 주소 및 전화번호")
+				.setFormattedText(text)
+				.setButtons( //버튼 출력안됨
+						new ArrayList<Button>(
+								Arrays.asList(
+										new Button()
+												.setTitle(library + " 홈페이지")
+												.setOpenUrlAction(
+														new OpenUrlAction().setUrl("https://assistant.google.com")))))
+		;
 
-		rb.add(simpleResponse);
-		rb.add(basicCard);
+		responseBuilder.add(simpleResponse);
+		responseBuilder.add(basicCard);
+//		responseBuilder.add("책 제목, 작가 이름, 출판사 명 중 하나를 선택해주세요.");
 
-		rb.addSuggestions(suggestions.toArray(new String[suggestions.size()]));
-		return rb.build();
+		responseBuilder.addSuggestions(new String[] {"책 제목", "작가 이름", "출판사명"});
+		return responseBuilder.build();
 	}
 
 	@ForIntent("select")
@@ -115,7 +128,6 @@ public class internApp extends DialogflowApp {
 		BasicCard basicCard = new BasicCard();
 		String parameter = CommonUtil.makeSafeString(request.getParameter("menus"));
 		//parameter 값을 어디서 가지고 오는건지 follow intent 라 가능한건지
-
 		simpleResponse.setTextToSpeech(parameter + "을 선택하셨습니다.");
 
 		basicCard
