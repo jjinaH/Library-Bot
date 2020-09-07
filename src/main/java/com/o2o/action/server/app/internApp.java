@@ -26,29 +26,31 @@ import java.util.concurrent.ExecutionException;
 public class internApp extends DialogflowApp {
 	@ForIntent("Default Welcome Intent")
 	public ActionResponse defaultWelcome(ActionRequest request) throws ExecutionException, InterruptedException {
-		ResponseBuilder rb = getResponseBuilder(request);
-		Map<String, Object> data = rb.getConversationData();
+		ResponseBuilder responseBuilder = getResponseBuilder(request);
+		Map<String, Object> data = responseBuilder.getConversationData();
 
 		data.clear();
 
-		List<String> suggestions = new ArrayList<String>();
+//		List<String> suggestions = new ArrayList<String>();
 		SimpleResponse simpleResponse = new SimpleResponse();
 		BasicCard basicCard = new BasicCard();
 
-		simpleResponse.setTextToSpeech("안녕하세요, 테스트앱 입니다.")
-				.setDisplayText("안녕하세요, 테스트앱 입니다.")
+		simpleResponse.setTextToSpeech("안녕하세요, 도서관에서 도서를 찾아드릴게요." +
+				"어떤 도서관에서 책을 찾아볼까요?")
+//				.setDisplayText("안녕하세요, 도서관에서 도서를 찾아드릴게요. " +
+//						"어떤 도서관에서 책을 찾아볼까요?")
 		;
 		basicCard
-				.setTitle("베이직 카드 제목")
-				.setFormattedText("테스트용 베이직 카드")
-				.setImage(new Image().setUrl("https://actions.o2o.kr/content/aiperson.gif")
-						.setAccessibilityText("home"));
+				.setTitle("도서검색도우미")
+				.setFormattedText("검색을 원하시는 도서관 이름을 말씀해주세요.")
+				.setImage(new Image().setUrl("https://actions.o2o.kr/devsvr4/templates/image/library_welcome.jfif")
+						.setAccessibilityText("도서관"));
 
-		rb.add(simpleResponse);
-		rb.add(basicCard);
+		responseBuilder.add(simpleResponse);
+		responseBuilder.add(basicCard);
 
-		rb.addSuggestions(suggestions.toArray(new String[suggestions.size()]));
-		return rb.build();
+		responseBuilder.addSuggestions(new String[] {"강서도서관", "서초구립반포도서관", "강남구립논현도서관"});
+		return responseBuilder.build();
 	}
 
 	@ForIntent("next")
@@ -68,7 +70,7 @@ public class internApp extends DialogflowApp {
 		basicCard
 				.setTitle("다음 인텐트")
 				.setFormattedText("인텐트 테스트용")
-				.setImage(new Image().setUrl("https://actions.o2o.kr/content/aiperson.gif")
+				.setImage(new Image().setUrl("https://actions.o2o.kr/devsvr4/templates/image/library_welcome.jfif")
 						.setAccessibilityText("home"));
 
 		rb.add(simpleResponse);
