@@ -5,19 +5,12 @@ import com.google.actions.api.ActionResponse;
 import com.google.actions.api.DialogflowApp;
 import com.google.actions.api.ForIntent;
 import com.google.actions.api.response.ResponseBuilder;
-import com.google.actions.api.response.helperintent.SelectionCarousel;
-import com.google.api.services.actions_fulfillment.v2.model.BasicCard;
-import com.google.api.services.actions_fulfillment.v2.model.Button;
-import com.google.api.services.actions_fulfillment.v2.model.CarouselSelectCarouselItem;
-import com.google.api.services.actions_fulfillment.v2.model.Image;
-import com.google.api.services.actions_fulfillment.v2.model.OptionInfo;
-import com.google.api.services.actions_fulfillment.v2.model.OpenUrlAction;
-import com.google.api.services.actions_fulfillment.v2.model.SimpleResponse;
+import com.google.actions.api.response.helperintent.SelectionList;
+import com.google.api.services.actions_fulfillment.v2.model.*;
+import com.o2o.action.server.repository.LibraryRepository;
 import com.o2o.action.server.util.CommonUtil;
+import org.springframework.beans.factory.annotation.Autowired;
 
-import java.io.UnsupportedEncodingException;
-import java.net.URLEncoder;
-import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
@@ -25,6 +18,10 @@ import java.util.Map;
 import java.util.concurrent.ExecutionException;
 
 public class internApp extends DialogflowApp {
+
+	//@Autowired
+	private LibraryRepository libraryRepository;
+
 	@ForIntent("Default Welcome Intent")
 	public ActionResponse defaultWelcome(ActionRequest request) throws ExecutionException, InterruptedException {
 		ResponseBuilder responseBuilder = getResponseBuilder(request);
@@ -61,12 +58,12 @@ public class internApp extends DialogflowApp {
 
 		data.clear();
 
-		List<String> suggestions = new ArrayList<String>();
 		SimpleResponse simpleResponse = new SimpleResponse();
 		BasicCard basicCard = new BasicCard();
 		String library = CommonUtil.makeSafeString(request.getParameter("library"));
-		String text = "주소랑 전화번호"; //DB에서 해당 도서관 주소 및 전화번호 가져오기
-		String homepage = null; //DB에서 해당 도서관 홈페이지주소 가져오기
+//		String address = libraryRepository.selectAddress(library);
+//		String tel = libraryRepository.selectTel(library); //DB에서 해당 도서관 주소 및 전화번호 가져오기
+//		String homepage = libraryRepository.selectHomepage(library); //DB에서 해당 도서관 홈페이지주소 가져오기
 
 		simpleResponse.setTextToSpeech(library + "에서 책을 검색할게요. 책 제목, 작가 이름, 출판사명 중" +
 				" 어떤 것으로 검색할까요?")
@@ -75,14 +72,14 @@ public class internApp extends DialogflowApp {
 		basicCard
 				.setTitle(library)
 				.setSubtitle("도서관 주소 및 전화번호")
-				.setFormattedText(text)
-				.setButtons( //버튼 출력안됨
-						new ArrayList<Button>(
-								Arrays.asList(
-										new Button()
-												.setTitle(library + " 홈페이지")
-												.setOpenUrlAction(
-														new OpenUrlAction().setUrl("https://assistant.google.com")))))
+//				.setFormattedText(address)
+//				.setButtons( //버튼 출력안됨
+//						new ArrayList<Button>(
+//								Arrays.asList(
+//										new Button()
+//												.setTitle(library + " 홈페이지")
+//												.setOpenUrlAction(
+//														new OpenUrlAction().setUrl(homepage)))))
 		;
 
 		responseBuilder.add(simpleResponse);
@@ -93,54 +90,85 @@ public class internApp extends DialogflowApp {
 		return responseBuilder.build();
 	}
 
-	@ForIntent("select")
-	public ActionResponse selectMenu(ActionRequest request) throws ExecutionException, InterruptedException {
-		ResponseBuilder rb = getResponseBuilder(request);
-		Map<String, Object> data = rb.getConversationData();
+	@ForIntent("Condition")
+	public ActionResponse condition(ActionRequest request) throws ExecutionException, InterruptedException {
+		ResponseBuilder responseBuilder = getResponseBuilder(request);
+		Map<String, Object> data = responseBuilder.getConversationData();
 
 		data.clear();
 
-		List<String> suggestions = new ArrayList<String>();
 		SimpleResponse simpleResponse = new SimpleResponse();
-		BasicCard basicCard = new BasicCard();
+		String choice = CommonUtil.makeSafeString(request.getParameter("choice"));
 
-		simpleResponse.setTextToSpeech("어떤 메뉴를 선택하시겠습니까?")
-				.setDisplayText("어떤 메뉴를 선택하시겠습니까?")
+		simpleResponse.setTextToSpeech("검색 조건으로 "+ choice + " 을 선택하셨습니다. 검색어를 말씀해주세요.")
+				.setDisplayText("검색 조건으로 "+ choice + " 을 선택하셨습니다. 검색어를 말씀해주세요.")
 		;
 
-
-		rb.add(simpleResponse);
-		rb.add(basicCard);
-
-		rb.addSuggestions(suggestions.toArray(new String[suggestions.size()]));
-		return rb.build();
+		responseBuilder.add(simpleResponse);
+		return responseBuilder.build();
 	}
 
-	@ForIntent("result")
+	@ForIntent("Search")
 	public ActionResponse result(ActionRequest request) throws ExecutionException, InterruptedException {
-		ResponseBuilder rb = getResponseBuilder(request);
-		Map<String, Object> data = rb.getConversationData();
+		ResponseBuilder responseBuilder = getResponseBuilder(request);
+//		Map<String, Object> data = responseBuilder.getConversationData();
+//
+//		data.clear();
 
-		data.clear();
-
-		List<String> suggestions = new ArrayList<String>();
-		SimpleResponse simpleResponse = new SimpleResponse();
 		BasicCard basicCard = new BasicCard();
 		String parameter = CommonUtil.makeSafeString(request.getParameter("menus"));
 		//parameter 값을 어디서 가지고 오는건지 follow intent 라 가능한건지
-		simpleResponse.setTextToSpeech(parameter + "을 선택하셨습니다.");
 
-		basicCard
-				.setTitle(parameter)
-				.setFormattedText(parameter + " 인텐트 테스트용")
-				.setImage(new Image().setUrl("https://actions.o2o.kr/devsvr4/templates/image/"+parameter+".png")
-						.setAccessibilityText(parameter));
-
-		rb.add(simpleResponse);
-		rb.add(basicCard);
-
-		rb.addSuggestions(suggestions.toArray(new String[suggestions.size()]));
-		return rb.build();
+		responseBuilder
+				.add("검색 결과")
+				.add(
+					new SelectionList()
+							.setTitle("List Title")
+							.setItems(
+									Arrays.asList(
+											new ListSelectListItem()
+													.setTitle("Title of First List Item")
+													.setDescription("This is a description of a list item.")
+													.setImage(
+															new Image()
+																	.setUrl(
+																			"https://storage.googleapis.com/actionsresources/logo_assistant_2x_64dp.png")
+																	.setAccessibilityText("Image alternate text"))
+													.setOptionInfo(
+															new OptionInfo()
+																	.setSynonyms(
+																			Arrays.asList("synonym 1", "synonym 2", "synonym 3"))
+																	.setKey("SELECTION_KEY_ONE")),
+											new ListSelectListItem()
+													.setTitle("Google Home")
+													.setDescription(
+															"Google Home is a voice-activated speaker powered by the Google Assistant.")
+													.setImage(
+															new Image()
+																	.setUrl(
+																			"https://storage.googleapis.com/actionsresources/logo_assistant_2x_64dp.png")
+																	.setAccessibilityText("Google Home"))
+													.setOptionInfo(
+															new OptionInfo()
+																	.setSynonyms(
+																			Arrays.asList(
+																					"Google Home Assistant",
+																					"Assistant on the Google Home"))
+																	.setKey("SELECTION_KEY_GOOGLE_HOME")),
+											new ListSelectListItem()
+													.setTitle("Google Pixel")
+													.setDescription("Pixel. Phone by Google.")
+													.setImage(
+															new Image()
+																	.setUrl(
+																			"https://storage.googleapis.com/actionsresources/logo_assistant_2x_64dp.png")
+																	.setAccessibilityText("Google Pixel"))
+													.setOptionInfo(
+															new OptionInfo()
+																	.setSynonyms(
+																			Arrays.asList("Google Pixel XL", "Pixel", "Pixel XL"))
+																	.setKey("SELECTION_KEY_GOOGLE_PIXEL")))));
+		return responseBuilder.build();
 	}
 
 	@ForIntent("Exit Conversation")

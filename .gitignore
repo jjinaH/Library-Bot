@@ -12,3 +12,7 @@ bin
 .idea
 *.iml
 local.properties
+
+actions_service_key
+
+build.gradlegit
