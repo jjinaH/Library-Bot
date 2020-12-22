@@ -39,6 +39,7 @@ repositories {
 
 dependencies {
     compile("org.springframework.boot:spring-boot-starter-web")
+//    compile("org.springframework.boot:spring-boot-starter-data-jpa")
     compile("org.springframework.boot:spring-boot-starter-thymeleaf")
     providedRuntime("org.springframework.boot:spring-boot-starter-tomcat")
     compile("com.google.zxing:core:3.3.3")
@@ -47,10 +48,10 @@ dependencies {
         exclude module : 'slf4j-log4j12'
     }
     testCompile("junit:junit")
-
     implementation 'org.springframework.boot:spring-boot-starter-thymeleaf'
     implementation 'org.springframework.boot:spring-boot-starter-web'
     implementation 'org.springframework.boot:spring-boot-starter-web-services'
+//    implementation 'org.springframework.boot:spring-boot-starter-data-jpa'
     implementation('org.apache.httpcomponents:httpclient:4.5')
 
     compile group: 'com.fasterxml.jackson.core', name: 'jackson-core', version: '2.9.3'
@@ -59,6 +60,14 @@ dependencies {
     compile group: 'com.googlecode.json-simple', name: 'json-simple', version: '1.1.1'
 
     compile "org.projectlombok:lombok:1.16.20"
+    annotationProcessor("org.projectlombok:lombok:1.18.8")
+
+    compile("org.postgresql:postgresql:42.2.5")
+
+    // Logging
+    compile group: 'org.bgee.log4jdbc-log4j2', name: 'log4jdbc-log4j2-jdbc4.1', version: '1.16'
+
+
 }
 
 remotes {

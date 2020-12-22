@@ -5,12 +5,9 @@ import java.util.concurrent.ExecutionException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
+import com.o2o.action.server.api.BookApi;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestMethod;
-import org.springframework.web.bind.annotation.ResponseBody;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 import com.o2o.action.server.app.internApp;
 //import com.o2o.action.server.repo.CategoryRepository;
@@ -19,6 +16,7 @@ import com.o2o.action.server.util.CommonUtil;
 @RestController
 public class internController {
 	private final internApp internApp;
+	private BookApi bookApi;
 
 	@Autowired
 	//private CategoryRepository categoryRepository;
@@ -44,4 +42,9 @@ public class internController {
 
 		return jsonResponse;
 	}
+
+//	@GetMapping("/isbn/title/{title}")
+//	public BookIsbn getIsbnByTitle(@RequestParam String title) throws ParseException {
+//		return libraryApi.getIsbnByTitle(title);
+//	}
 }
